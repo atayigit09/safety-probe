@@ -1,0 +1,193 @@
+Loading hidden states from cache...
+Hidden states loaded from feature_caches/llama3.2_train/hidden_states.pt
+  Metadata: {'model_name': 'meta-llama/Llama-3.2-3B-Instruct', 'n_samples_tbg': 14278}
+Computing joint risk target for training labels...
+--------------------------------------------------------------------------------
+Hidden states ready!
+  TBG - Number of layers: 29
+  TBG - Shape per layer: torch.Size([14278, 3072])
+  TBG - Total samples: 14278
+--------------------------------------------------------------------------------
+
+================================================================================
+TRAINING MLP PROBES
+================================================================================
+
+================================================================================
+Training single-layer MLP probes...
+================================================================================
+Train size: 11422, Val size: 2856
+Training probes:   0%|                                             Layer  0: Train MSE: 0.0494, Val MSE: 0.0539, Val R²: -0.0006
+Training probes:   3%|█████▌                                                                                                                                                           | 1/29 [00:11<05:10, 11.10s/it]Layer  1: Train MSE: 0.0301, Val MSE: 0.0361, Val R²: 0.3308
+Training probes:   7%|███████████                                                                                                                                                      | 2/29 [00:42<10:18, 22.92s/it]Layer  2: Train MSE: 0.0250, Val MSE: 0.0321, Val R²: 0.4049
+Training probes:  10%|████████████████▋                                                                                                                                                | 3/29 [01:13<11:30, 26.57s/it]Layer  3: Train MSE: 0.0266, Val MSE: 0.0345, Val R²: 0.3599
+Training probes:  14%|██████████████████████▏                                                                                                                                          | 4/29 [01:40<11:11, 26.85s/it]Layer  4: Train MSE: 0.0213, Val MSE: 0.0312, Val R²: 0.4207
+Training probes:  17%|███████████████████████████▊                                                                                                                                     | 5/29 [02:01<09:50, 24.58s/it]Layer  5: Train MSE: 0.0186, Val MSE: 0.0301, Val R²: 0.4422
+Training probes:  21%|█████████████████████████████████▎                                                                                                                               | 6/29 [02:17<08:20, 21.77s/it]Layer  6: Train MSE: 0.0156, Val MSE: 0.0301, Val R²: 0.4418
+Training probes:  24%|██████████████████████████████████████▊                                                                                                                          | 7/29 [02:43<08:30, 23.18s/it]Layer  7: Train MSE: 0.0133, Val MSE: 0.0255, Val R²: 0.5268
+Training probes:  28%|████████████████████████████████████████████▍                                                                                                                    | 8/29 [03:00<07:28, 21.34s/it]Layer  8: Train MSE: 0.0135, Val MSE: 0.0256, Val R²: 0.5255
+Training probes:  31%|█████████████████████████████████████████████████▉                                                                                                               | 9/29 [03:18<06:43, 20.15s/it]Layer  9: Train MSE: 0.0116, Val MSE: 0.0237, Val R²: 0.5600
+Training probes:  34%|████████████████████████████████████████                                                              /29 [03:34<06:01, 19.02s/it]Layer 10: Train MSE: 0.0088, Val MSE: 0.0215, Val R²: 0.6008
+Training probes:  38%|████████████████████████████████████████████████████████████▋                                                                                                   | 11/29 [03:55<05:51, 19.51s/it]Layer 11: Train MSE: 0.0078, Val MSE: 0.0217, Val R²: 0.5975
+Training probes:  41%|██████████████████████████████████████████████████████████████████▏                                                                                             | 12/29 [04:19<05:56, 20.95s/it]Layer 12: Train MSE: 0.0084, Val MSE: 0.0201, Val R²: 0.6266
+Training probes:  45%|███████████████████████████████████████████████████████████████████████▋                                                                                        | 13/29 [04:36<05:15, 19.69s/it]Layer 13: Train MSE: 0.0065, Val MSE: 0.0168, Val R²: 0.6887
+Training probes:  48%|█████████████████████████████████████████████████████████████████████████████▏                                                                                  | 14/29 [04:53<04:45, 19.02s/it]Layer 14: Train MSE: 0.0084, Val MSE: 0.0171, Val R²: 0.6818
+Training probes:  52%|██████████████████████████████████████████████████████████████████████████████████▊                                                                             | 15/29 [05:03<03:48, 16.29s/it]Layer 15: Train MSE: 0.0063, Val MSE: 0.0154, Val R²: 0.7136
+Training probes:  55%|████████████████████████████████████████████████████████████████████████████████████████▎                                                                       | 16/29 [05:13<03:07, 14.41s/it]Layer 16: Train MSE: 0.0059, Val MSE: 0.0151, Val R²: 0.7194
+Training probes:  59%|█████████████████████████████████████████████████████████████████████████████████████████████▊                                                                  | 17/29 [05:24<02:37, 13.11s/it]Layer 17: Train MSE: 0.0062, Val MSE: 0.0157, Val R²: 0.7090
+Training probes:  62%|███████████████████████████████████████████████████████████████████████████████████████████████████▎                                                            | 18/29 [05:33<02:13, 12.15s/it]Layer 18: Train MSE: 0.0061, Val MSE: 0.0154, Val R²: 0.7148
+Training probes:  66%|████████████████████████████████████████████████████████████████████████████████████████████████████████▊                                                       | 19/29 [05:44<01:56, 11.69s/it]Layer 19: Train MSE: 0.0062, Val MSE: 0.0146, Val R²: 0.7300
+Training probes:  69%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████▎                                                 | 20/29 [05:53<01:37, 10.82s/it]Layer 20: Train MSE: 0.0059, Val MSE: 0.0147, Val R²: 0.7274
+Training probes:  72%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████▊                                            | 21/29 [06:03<01:24, 10.60s/it]Layer 21: Train MSE: 0.0052, Val MSE: 0.0157, Val R²: 0.7092
+Training probes:  76%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▍                                      | 22/29 [06:13<01:13, 10.49s/it]Layer 22: Train MSE: 0.0054, Val MSE: 0.0154, Val R²: 0.7145
+Training probes:  79%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▉                                 | 23/29 [06:24<01:03, 10.54s/it]Layer 23: Train MSE: 0.0053, Val MSE: 0.0152, Val R²: 0.7181
+Training probes:  83%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▍                           | 24/29 [06:33<00:50, 10.16s/it]Layer 24: Train MSE: 0.0049, Val MSE: 0.0143, Val R²: 0.7356
+Training probes:  86%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▉                      | 25/29 [06:43<00:39,  9.92s/it]Layer 25: Train MSE: 0.0054, Val MSE: 0.0146, Val R²: 0.7284
+Training probes:  90%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▍                | 26/29 [06:51<00:28,  9.41s/it]Layer 26: Train MSE: 0.0048, Val MSE: 0.0141, Val R²: 0.7380
+Training probes:  93%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▉           | 27/29 [07:01<00:19,  9.59s/it]Layer 27: Train MSE: 0.0054, Val MSE: 0.0148, Val R²: 0.7257
+Training probes:  97%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▍     | 28/29 [07:11<00:09,  9.80s/it]Layer 28: Train MSE: 0.0047, Val MSE: 0.0134, Val R²: 0.7515
+Training probes: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 29Training probes: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 29/29 [07:22<00:00, 15.26s/it]
+
+Best layer: 28 with validation MSE: 0.0134
+Val MSE: 0.0134
+Val R²: 0.7515
+
+================================================================================
+Training concatenated layers MLP probe (layers [16, 20, 25, 27, 28])...
+================================================================================
+
+Training MLP probe on concatenated layers: [16, 20, 25, 27, 28]
+Concatenated feature shape: (14278, 15360)
+  Original feature dim per layer: 3072
+  Total concatenated dim: 15360
+
+Concatenated Layers [16, 20, 25, 27, 28] Results:
+  Train MSE: 0.0050, MAE: 0.0265, R²: 0.8987
+  Val   MSE: 0.0143, MAE: 0.0483, R²: 0.7339
+
+================================================================================
+MLP COMPARISON: Single Best Layer vs Concatenated Layers
+================================================================================
+
+Single Best Layer (Layer 28):
+  Val MSE: 0.0134
+  Val R²: 0.7515
+
+Concatenated Layers [16, 20, 25, 27, 28]:
+  Val MSE: 0.0143
+  Val R²: 0.7339
+
+Improvement:
+  Val MSE: -7.09% (worse)
+  Val R²: -0.0176 (worse)
+================================================================================
+
+Saving MLP results...
+Arguments saved to: runs/test5/mlp/arguments.json
+Safety probes saved to: runs/test5/mlp/safety_probe.pkl
+Creating MLP visualizations...
+Visualization saved to: runs/test5/mlp/safety_probe_results_mlp.png
+
+================================================================================
+TRAINING LINEAR PROBES
+================================================================================
+
+================================================================================
+Training single-layer linear probes...
+================================================================================
+Train size: 11422, Val size: 2856
+Training linear probes:   0%|          | 0/29 [00:00<?, ?it/s]Layer  0: Train MSE: 0.0494, Val MSE: 0.0540, Val R²: -0.0017
+Training linear probes:   3%|  | 1/29 [00:00<00:20,  1.38it/s]Layer  1: Train MSE: 0.0360, Val MSE: 0.0401, Val R²: 0.2559
+Training linear probes:   7%|▏ | 2/29 [00:01<00:18,  1.42it/s]Layer  2: Train MSE: 0.0309, Val MSE: 0.0347, Val R²: 0.3565
+Training linear probes:  10%|▏ | 3/29 [00:02<00:18,  1.44it/s]Layer  3: Train MSE: 0.0285, Val MSE: 0.0330, Val R²: 0.3883
+Training linear probes:  14%|▎ | 4/29 [00:02<00:17,  1.45it/s]Layer  4: Train MSE: 0.0251, Val MSE: 0.0309, Val R²: 0.4261
+Training linear probes:  17%|▎ | 5/29 [00:03<00:16,  1.45it/s]Layer  5: Train MSE: 0.0216, Val MSE: 0.0298, Val R²: 0.4465
+Training linear probes:  21%|▍ | 6/29 [00:04<00:16,  1.43it/s]Layer  6: Train MSE: 0.0206, Val MSE: 0.0294, Val R²: 0.4540
+Training linear probes:  24%|▍ | 7/29 [00:04<00:15,  1.40it/s]Layer  7: Train MSE: 0.0186, Val MSE: 0.0278, Val R²: 0.4847
+Training linear probes:  28%|▌ | 8/29 [00:05<00:14,  1.42it/s]Layer  8: Train MSE: 0.0176, Val MSE: 0.0269, Val R²: 0.5010
+Training linear probes:  31%|▌ | 9/29 [00:06<00:14,  1.40it/s]Layer  9: Train MSE: 0.0160, Val MSE: 0.0254, Val R²: 0.5280
+Training linear probes:  34%|▎| 10/29 [00:07<00:13,  1.38it/s]Layer 10: Train MSE: 0.0151, Val MSE: 0.0249, Val R²: 0.5379
+Training linear probes:  38%|▍| 11/29 [00:07<00:12,  1.41it/s]Layer 11: Train MSE: 0.0146, Val MSE: 0.0248, Val R²: 0.5405
+Training linear probes:  41%|▍| 12/29 [00:08<00:11,  1.43it/s]Layer 12: Train MSE: 0.0133, Val MSE: 0.0228, Val R²: 0.5770
+Training linear probes:  45%|▍| 13/29 [00:09<00:11,  1.44it/s]Layer 13: Train MSE: 0.0124, Val MSE: 0.0223, Val R²: 0.5860
+Training linear probes:  48%|▍| 14/29 [00:09<00:10,  1.46it/s]Layer 14: Train MSE: 0.0121, Val MSE: 0.0222, Val R²: 0.5873
+Training linear probes:  52%|▌| 15/29 [00:10<00:09,  1.42it/s]Layer 15: Train MSE: 0.0111, Val MSE: 0.0215, Val R²: 0.6004
+Training linear probes:  55%|▌| 16/29 [00:11<00:09,  1.39it/s]Layer 16: Train MSE: 0.0106, Val MSE: 0.0208, Val R²: 0.6132
+Training linear probes:  59%|▌| 17/29 [00:12<00:08,  1.38it/s]Layer 17: Train MSE: 0.0103, Val MSE: 0.0205, Val R²: 0.6203
+Training linear probes:  62%|▌| 18/29 [00:12<00:08,  1.35it/s]Layer 18: Train MSE: 0.0101, Val MSE: 0.0207, Val R²: 0.6151
+Training linear probes:  66%|▋| 19/29 [00:13<00:07,  1.35it/s]Layer 19: Train MSE: 0.0099, Val MSE: 0.0204, Val R²: 0.6220
+Training linear probes:  69%|▋| 20/29 [00:14<00:06,  1.36it/s]Layer 20: Train MSE: 0.0096, Val MSE: 0.0200, Val R²: 0.6292
+Training linear probes:  72%|▋| 21/29 [00:14<00:05,  1.39it/s]Layer 21: Train MSE: 0.0095, Val MSE: 0.0197, Val R²: 0.6349
+Training linear probes:  76%|▊| 22/29 [00:15<00:04,  1.41it/s]Layer 22: Train MSE: 0.0096, Val MSE: 0.0199, Val R²: 0.6308
+Training linear probes:  79%|▊| 23/29 [00:16<00:04,  1.41it/s]Layer 23: Train MSE: 0.0096, Val MSE: 0.0199, Val R²: 0.6306
+Training linear probes:  83%|▊| 24/29 [00:17<00:03,  1.38it/s]Layer 24: Train MSE: 0.0091, Val MSE: 0.0190, Val R²: 0.6483
+Training linear probes:  86%|▊| 25/29 [00:17<00:02,  1.37it/s]Layer 25: Train MSE: 0.0093, Val MSE: 0.0197, Val R²: 0.6352
+Training linear probes:  90%|▉| 26/29 [00:18<00:02,  1.39it/s]Layer 26: Train MSE: 0.0093, Val MSE: 0.0196, Val R²: 0.6371
+Training linear probes:  93%|▉| 27/29 [00:19<00:01,  1.41it/s]Layer 27: Train MSE: 0.0091, Val MSE: 0.0194, Val R²: 0.6403
+Training linear probes:  97%|▉| 28/29 [00:19<00:00,  1.41it/s]Layer 28: Train MSE: 0.0088, Val MSE: 0.0191, Val R²: 0.6450
+Training linear probes: 100%|█| 29/29 [00:20<00:00,  1.40it/s]
+
+Best layer: 24 with validation MSE: 0.0190
+Val MSE: 0.0190
+Val R²: 0.6483
+
+================================================================================
+Training concatenated layers linear probe (layers [16, 20, 25, 27, 28])...
+================================================================================
+
+Training linear probe on concatenated layers: [16, 20, 25, 27, 28]
+Concatenated feature shape: (14278, 15360)
+  Original feature dim per layer: 3072
+  Total concatenated dim: 15360
+
+Concatenated Layers [16, 20, 25, 27, 28] Results (Linear):
+  Train MSE: 0.0010, MAE: 0.0142, R²: 0.9796
+  Val   MSE: 0.0365, MAE: 0.1101, R²: 0.3234
+
+================================================================================
+LINEAR COMPARISON: Single Best Layer vs Concatenated Layers
+================================================================================
+
+Single Best Layer (Layer 24):
+  Val MSE: 0.0190
+  Val R²: 0.6483
+
+Concatenated Layers [16, 20, 25, 27, 28]:
+  Val MSE: 0.0365
+  Val R²: 0.3234
+
+Improvement:
+  Val MSE: -92.35% (worse)
+  Val R²: -0.3248 (worse)
+================================================================================
+
+Saving linear results...
+Arguments saved to: runs/test5/linear/arguments.json
+Safety probes saved to: runs/test5/linear/safety_probe.pkl
+Creating linear visualizations...
+Visualization saved to: runs/test5/linear/safety_probe_results_linear.png
+
+================================================================================
+TRAINING COMPLETED SUCCESSFULLY!
+================================================================================
+
+All models saved to: runs/test5
+  MLP probes: runs/test5/mlp
+  Linear probes: runs/test5/linear
+
+================================================================================
+CROSS-COMPARISON: MLP vs LINEAR (Best Concatenated Models)
+================================================================================
+
+MLP Concatenated:
+  Val MSE: 0.0143
+  Val R²: 0.7339
+
+Linear Concatenated:
+  Val MSE: 0.0365
+  Val R²: 0.3234
+
+MLP vs Linear:
+  MSE Improvement: +60.67% (MLP better)
+  R² Improvement: +0.4105 (MLP better)
+================================================================================

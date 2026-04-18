@@ -1,0 +1,23 @@
+{
+  "output_dir": "test",
+  "concat_layers": [
+    16,
+    20,
+    25,
+    27,
+    28
+  ],
+  "alpha": 0.75,
+  "device": "mps",
+  "hidden_dim": 128,
+  "activation": "silu",
+  "dropout": 0.4,
+  "learning_rate": 0.0005,
+  "num_epochs": 100,
+  "mlp_batch_size": 128,
+  "patience": 20,
+  "cache_dir": "feature_caches/llama3.2_train",
+  "ridge_alpha": 1.0,
+  "probe_name": "safety_probe",
+  "model_name": "meta-llama/Llama-3.2-3B-Instruct"
+}
