@@ -1,0 +1,61 @@
+model:
+  model_id: meta-llama/Llama-3.1-8B-Instruct
+  device: "cuda"
+  load_in_8bit: false
+  load_in_4bit: false
+  batch_size: 10
+  use_cache: true
+  low_cpu_mem_usage: true
+  attn_implementation: flash_attention_2  # Enable Flash Attention 2 for better performance
+  load_model : false
+
+## Available models:
+#meta-llama/Llama-3.1-8B-Instruct
+#meta-llama/Llama-3.2-3B-Instruct
+#Qwen/Qwen3-8B
+
+
+
+generation:
+  max_length: 200
+  temperature: 1.0
+  top_p: 0.9
+  top_k: 50
+  format_prompt: true
+
+safety_entropy:
+  num_generations: 10
+  methods: [method1, method2] #these will be updated later
+
+data:
+  harmful_path: "data/xTRam1_harmful_train.json"
+  benign_path: "data/benign_prompts.json"
+  save_path: "data/results_xtram"
+  
+
+clustering:
+  processed_file: "data_new/processed_results/meta-llama/Llama-3.2-3B-Instruct/xtram_harmful_test_processed.json"
+  save_path: "data_new/clustering_results/meta-llama/Llama-3.2-3B-Instruct"
+
+
+  llm_based:
+    api_key: ""
+    llm_model_id: "gemini-2.5-flash"
+    cluster_weights: [3.0, 2.5, 1.0] #harmful_compliance, disguised_harmful, appropriate_refusal
+    project_id: ""
+    region: ""
+
+  nli_based:
+    nli_model_name: "microsoft/deberta-v2-xlarge-mnli"
+    device: "mps"
+    max_length: 512
+
+feature_generation:
+  data_path: "data/clustering_results/clustered_data.json"
+  model_name: "meta-llama/Llama-3.2-3B-Instruct"
+  n_samples: null  # null means use all samples
+  batch_size: 5
+  max_length: 512
+  cache_dir: "models/safety_probes/cache"
+  no_cache: false
+  device: "auto"  # auto, cuda, mps, or cpu    

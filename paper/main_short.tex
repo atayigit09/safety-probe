@@ -1,0 +1,261 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%    Canadian AI Short Paper - Camera Ready          %
+%    NOTE: Camera-ready must use PMLR template.      %
+%    Replace \documentclass[10pt]{cai} with the      %
+%    appropriate PMLR class when available.           %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[10pt]{cai}
+
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{graphicx}
+\newcommand{\placeholder}[1]{\textcolor{red}{[#1]}}
+\begin{document}
+\def\conferenceyear{2026}
+\volumeheader{37}{00.000}
+\begin{center}
+
+\title{Real-Time Jailbreak Detection via Safety-Weighted Semantic Entropy Probes}
+\maketitle
+
+\thispagestyle{empty}
+
+\begin{tabular}{ccc}
+Ata Dundar Yigit\upstairs{\affilone,*}, Mohammad Zandsalimy\upstairs{\affiltwo}, Shanu Sushmita\upstairs{\affilone}
+\\[0.25ex]
+{\small \upstairs{\affilone} Northeastern University, Seattle, WA, USA} \\
+{\small \upstairs{\affiltwo} Synopsys Inc., Vancouver, CA} \\
+\end{tabular}
+  
+\emails{
+ \upstairs{*}yigit.a@northeastern.edu, mohammad.zandsalimy@synopsys.com, s.sushmita@northeastern.edu
+}
+\vspace*{0.2in}
+\end{center}
+
+
+\begin{abstract}
+Large language models remain vulnerable to jailbreak attacks that bypass safety alignment. Existing defenses often require multi-pass generation or gradient analysis, limiting real-time deployment. We introduce \textbf{Safety-Weighted Semantic Entropy (SWSE) Probes}, a lightweight method for detecting jailbreak attempts at the token-before-generation stage using neural probes on model hidden states. Inspired by semantic entropy approaches for hallucination detection, our method estimates jailbreak likelihood from a single forward pass by training probes on safety-aware entropy scores derived from clustered model responses. Evaluated on Llama-3.2-3B-Instruct using 9,697 harmful and 7,000 benign prompts, our concatenated multi-layer MLP probes achieve ROC AUC of 0.989 and 96.7\% accuracy with 100$\times$ less computation than multi-sampling defenses.
+\end{abstract}
+
+\begin{keywords}{Keywords:}
+Jailbreak Detection, Language Model Safety, Semantic Entropy, Neural Probes, Real-time Defense
+\end{keywords}
+\copyrightnotice
+
+\section{Introduction}
+
+Despite extensive safety alignment, large language models (LLMs) remain susceptible to jailbreak attacks that elicit harmful behavior through adversarial prompt engineering. Recent attacks such as Camouflaged Jailbreaks~\cite{camouflaged2024} and AgentHarm~\cite{agentharm2024} achieve success rates exceeding 70\% on aligned models, highlighting persistent weaknesses in current safety mechanisms. Existing defenses face a fundamental trade-off between effectiveness and computational cost: multi-pass approaches~\cite{semanticsmooth2024, safedecoding2024} incur high latency, while gradient-based methods~\cite{gradientcuff2024} require expensive backward passes that double inference cost.
+
+A key observation motivates our approach: sampling multiple responses from the same adversarial input often reveals at least one harmful completion~\cite{bestofn2024}, suggesting jailbreak risk can be inferred from internal uncertainty signals before generation occurs. Building on semantic entropy probes for hallucination detection~\cite{kuhn2023semantic, sep2024}, we introduce \textbf{SWSE Probes}, which predict jailbreak likelihood from hidden states at the token-before-generation (TBG) position. Our contributions are: (1)~a safety-aware entropy framework combining intent-based clustering with weighted entropy and direct safety scores; (2)~a single-forward-pass detection method achieving over 100$\times$ speedup; (3)~evaluation on 16,697 prompts from diverse jailbreak benchmarks; and (4)~layer-wise analysis revealing that middle-to-late layers encode the strongest safety signals, with multi-layer concatenation yielding best performance.
+
+
+\section{Related Work}
+
+\textbf{Jailbreak attacks} have evolved from role-playing exploits (DAN-style~\cite{dan2023}) to sophisticated semantic manipulations. Camouflaged Jailbreaks~\cite{camouflaged2024} disguise harmful intent through indirect phrasing, while AgentHarm~\cite{agentharm2024} chains benign-seeming sub-tasks to achieve harmful objectives. Standardized benchmarks including JailbreakBench~\cite{jailbreakbench2024} and HarmBench~\cite{harmbench2024} have revealed attack success rates above 70\% in aligned models.
+
+\textbf{Semantic defenses} fall into two broad categories. SemanticSmooth~\cite{semanticsmooth2024} and SafeDecoding~\cite{safedecoding2024} analyze response consistency across multiple samplings but require repeated model invocations introducing prohibitive latency. GradientCuff~\cite{gradientcuff2024} detects abnormal training dynamics through gradient analysis but requires backward passes doubling inference cost. Our method achieves detection through a single forward pass using lightweight probes.
+
+\textbf{Semantic entropy} was introduced by Kuhn et al.~\cite{kuhn2023semantic} for hallucination detection via response clustering, later validated across multiple LLMs~\cite{nature2024}. Kossen et al.~\cite{sep2024} introduced Semantic Entropy Probes (SEP) approximating this from single forward passes with 100$\times$ speedup. We adapt the SEP framework to safety, introducing intent-based clustering and safety-weighted entropy to address behavioral uncertainty---the model's stochastic tendency to comply with adversarial prompts.
+
+
+\section{Methodology}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{figs/framework_diagram.jpg}
+\caption{SWSE Probe framework overview. \textbf{Training (offline):} Multiple responses are generated per prompt, clustered by safety intent, and used to compute risk scores as supervision targets for probes on TBG hidden states. \textbf{Detection (online):} A single forward pass predicts jailbreak likelihood, enabling early stopping before generation.}
+\label{fig:framework}
+\end{figure*}
+
+\subsection{Problem Formulation}
+
+Given a prompt $x$, we estimate a risk score $\hat{T}(x) \in [0,1]$ at the TBG stage from hidden states $\mathbf{h}^{(l)}_{\text{TBG}}(x)$ using a single forward pass, where $\hat{T}(x) \approx 0$ indicates safe refusal and $\hat{T}(x) \approx 1$ indicates likely harmful compliance. Figure~\ref{fig:framework} illustrates the complete framework operating in offline training and online detection stages.
+
+\subsection{Safety-Weighted Semantic Entropy}
+
+Traditional semantic entropy~\cite{kuhn2023semantic} clusters semantically equivalent responses to measure factual uncertainty, treating all outcomes with equal informational weight. We extend it with \textbf{intent-based clustering} that partitions responses into three safety-critical categories: \emph{Harmful Compliance} (HC)---direct compliance providing dangerous information; \emph{Disguised Harmful} (DH)---seemingly benign responses that subtly enable harm; and \emph{Appropriate Refusal} (AR)---proper rejection with safety-aligned explanations.
+
+For each prompt, we generate $N$ responses via temperature sampling ($T{=}1.0$, top-$p{=}0.9$, top-$k{=}50$) to capture the model's behavioral uncertainty. An LLM classifier (Gemini 2.5 Flash) assigns each response to an intent category, yielding empirical probabilities $p_i(x)$ for $i \in \{\text{HC}, \text{DH}, \text{AR}\}$. We define \textbf{Safety-Weighted Semantic Entropy}:
+
+\begin{equation}
+\text{SWSE}(x) = -\sum_{i \in \{\text{HC}, \text{DH}, \text{AR}\}} w_i \cdot p_i(x) \log p_i(x)
+\label{eq:swse}
+\end{equation}
+
+where $w_i$ are safety-aware weights emphasizing high-risk categories, and a \textbf{safety score} directly quantifying compliance risk:
+
+\begin{equation}
+s(x) = p_{\text{HC}}(x) + 0.5 \cdot p_{\text{DH}}(x)
+\label{eq:safety_score}
+\end{equation}
+
+These complementary signals---$s(x)$ measuring \emph{magnitude of harm} and SWSE$(x)$ measuring \emph{alignment instability}---are unified into a \textbf{Joint Risk Target}:
+
+\begin{equation}
+T(x) = \alpha \cdot s(x) + (1-\alpha) \cdot \frac{\text{SWSE}(x)}{\log(|\mathcal{I}|)}
+\label{eq:joint_risk}
+\end{equation}
+
+where $\alpha = 0.7$ balances actual harm with behavioral volatility, and normalization by $\log(|\mathcal{I}|) = \log(3)$ ensures $T(x) \in [0,1]$.
+
+\subsection{Probe Architecture}
+
+We evaluate single-layer probes trained independently on hidden states $\mathbf{h}^{(l)}_{\text{TBG}}$ from each layer, and multi-layer concatenated probes combining strategically selected layers $\mathbf{h}_{\text{concat}} = [\mathbf{h}^{(l_1)}_{\text{TBG}}; \ldots; \mathbf{h}^{(l_k)}_{\text{TBG}}]$. A four-layer MLP regressor with sigmoid activation predicts $\hat{T}(x)$, trained with MSE loss. Concatenating layers spanning early-to-late stages captures both early semantic processing and later safety-alignment representations.
+
+\subsection{Data Collection}
+
+We curate prompts from established jailbreak benchmarks. Harmful prompts (9,697 total) are aggregated from JailBreakV-28K (5,000), xTRam1~\cite{xtram2024} (3,000), In-The-Wild-Jailbreak~\cite{wildjailbreak2024} (651), AdvBench~\cite{advbench2024} (509), HarmBench~\cite{harmbench2024} (382), JailbreakBench~\cite{jailbreakbench2024} (100), and TDC23-RedTeaming~\cite{tdc2023} (55). Benign prompts (7,000) are drawn from the xTRam1 benign split. We perform deduplication via case-insensitive matching and exclude trivially short or non-textual entries.
+
+
+\section{Experimental Setup}
+
+For each prompt, we extract hidden states at the TBG position---the final token after applying the model's chat template---capturing the model's internal representation immediately prior to autoregressive decoding. To construct supervision signals, we generate $N$ responses per prompt via temperature sampling, classified by Gemini~2.5~Flash into intent categories to compute safety-weighted entropy and joint risk targets. We evaluate on a held-out test set of \textbf{650 harmful} and \textbf{1,410 benign} prompts from xTRam1, reporting distributional separation metrics (ROC AUC, Cohen's $d$), statistical significance tests (Kolmogorov--Smirnov, Mann--Whitney~U), and threshold-based classification performance. Full implementation details, probe hyperparameters, and dataset breakdown are provided in Appendix~\ref{app:setup}.
+
+
+\section{Results}
+
+\subsection{Distributional Separation}
+
+Table~\ref{tab:tbg_results} summarizes probe predictions across layer configurations. Without using ground-truth labels during inference, the concatenated multi-layer probe naturally separates prompts into distinct clusters: benign prompts concentrate at low scores (mean: 0.003, $\sigma$: 0.036) while harmful prompts cluster higher (mean: 0.260, $\sigma$: 0.288), representing a 76.5$\times$ difference in mean scores. Single-layer probes on late layers (23--28) also demonstrate natural clustering, with layer~28 achieving the best single-layer validation MSE (0.0134).
+
+\begin{table}[ht]
+\centering
+\caption{TBG MLP probe predictions: mean $\pm$ std (1,410 benign, 650 harmful test prompts).}
+\label{tab:tbg_results}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Layer Configuration} & \textbf{Benign} & \textbf{Harmful} \\
+\midrule
+Single Layer 23 & $0.002 \pm 0.020$ & $0.217 \pm 0.295$ \\
+Single Layer 27 & $0.001 \pm 0.011$ & $0.213 \pm 0.286$ \\
+Single Layer 28 & $0.006 \pm 0.048$ & $0.236 \pm 0.287$ \\
+\midrule
+\textbf{Concat (2,3,20,23,28)} & $\mathbf{0.003 \pm 0.036}$ & $\mathbf{0.260 \pm 0.288}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Statistical Validation and Classification}
+
+\begin{table}[ht]
+\centering
+\caption{Statistical analysis for concatenated MLP probe.}
+\label{tab:validation}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Metric} & \textbf{Benign (n=1410)} & \textbf{Harmful (n=650)} \\
+\midrule
+Mean $\pm$ Std & $0.003 \pm 0.036$ & $0.260 \pm 0.288$ \\
+Range [min, max] & [0.000, 0.754] & [0.000, 0.819] \\
+\midrule
+\multicolumn{3}{@{}l@{}}{\textbf{Separation Metrics}} \\
+\midrule
+\multicolumn{2}{@{}l@{}}{$\Delta$ Mean = 0.257 (76.5$\times$ ratio)} & ROC AUC: 0.989 \\
+\multicolumn{2}{@{}l@{}}{Cohen's d = 1.559 } & KS stat: 0.940 \\
+\multicolumn{2}{@{}l@{}}{Optimal threshold: 0.0010} & Accuracy: 96.7\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:validation} presents comprehensive statistical analysis of distributional separation. The mean harmful score (0.260) is 76.5$\times$ higher than the benign score (0.003), with Cohen's $d = 1.559$ indicating very large effect size. ROC AUC of 0.989 demonstrates near-perfect discrimination, while Kolmogorov--Smirnov ($D = 0.940$, $p < 10^{-322}$) and Mann--Whitney U ($p < 10^{-279}$) tests confirm highly significant distributional differences.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.75\textwidth]{figs/roc_curve.png}
+\caption{ROC curves for the concatenated MLP probe and best single-layer probe. The optimal operating point (red dot) maximizes Youden's J statistic at threshold $\theta = 0.0010$.}
+\label{fig:roc_curve}
+\end{figure}
+
+Figure~\ref{fig:roc_curve} shows ROC curve analysis confirming near-perfect separation. At a conservative deployment threshold of 0.1, the probe achieves 0.85\% false positive rate (12/1,410 benign) and 6.15\% false negative rate (40/650 harmful), yielding 99.15\% true negative rate and 93.85\% true positive rate. The low false positive rate is critical for production deployment, minimizing over-refusal of legitimate requests.
+
+\subsection{Layer-wise Analysis}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.9\textwidth]{figs/layer_comparison.png}
+\caption{Single-layer probe predictions across all layers of Llama-3.2-3B-Instruct. Early layers show poor separation while middle-to-late layers encode strong safety signals.}
+\label{fig:layer_performance}
+\end{figure}
+
+Figure~\ref{fig:layer_performance} illustrates single-layer probe performance across all model layers. Early layers show poor separation---layer~0 produces constant predictions and layers 1--4 show weak discrimination. Middle-to-late layers demonstrate consistent separation, with layer~28 achieving the best validation performance (MSE: 0.0134, R$^2$: 0.752). Concatenating layers spanning early-to-late stages (2, 3, 20, 23, 28) yields the best overall performance by capturing complementary representations.
+
+
+\section{Discussion and Limitations}
+
+Our results demonstrate that uncertainty quantification techniques for hallucination detection transfer effectively to the safety domain, suggesting models encode safety-relevant uncertainty in hidden representations accessible through lightweight probes. SWSE probes enable flexible deployment: blocking (reject high-scoring prompts before generation), monitoring (log scores for pattern analysis), or adaptive mode (trigger additional defenses selectively while allowing low-risk prompts to proceed).
+
+Several limitations apply. Intent classification relies on an external LLM (Gemini 2.5 Flash), introducing potential supervision biases. We evaluate only text-based prompts; multimodal jailbreaks~\cite{mazeika2024harmbench} may require different approaches. Adversarial robustness of the probes themselves---against attackers aware of probe-based detection---remains unexplored. Future directions include cross-model transfer, learned category weighting, and dynamic layer selection.
+
+
+\section{Conclusion}
+
+We introduce Safety-Weighted Semantic Entropy Probes for detecting jailbreak attempts at the TBG stage using MLP probes on model hidden states. By adapting semantic entropy approaches to the safety domain, our method achieves real-time detection with 100$\times$ speedup over multi-sampling defenses. Evaluation on Llama-3.2-3B-Instruct with 16,697 prompts demonstrates highly effective detection (ROC AUC: 0.989, accuracy: 96.7\%), enabling systems to preemptively stop harmful generations before token production begins.
+
+\section*{Acknowledgements}
+
+This work was supported by [to be filled in camera-ready version].
+
+\printbibliography[heading=subbibintoc]
+
+\newpage
+\appendix
+
+\section{Detailed Experimental Setup}
+\label{app:setup}
+
+This appendix provides additional implementation details for reproducibility.
+
+\subsection{Offline Training Stage}
+
+\textbf{TBG Hidden State Extraction.}
+For each prompt, we extract hidden states at the token-before-generation (TBG) position, defined as the final token of the formatted prompt after applying the model's chat template. Specifically, for Llama-3.2-3B-Instruct, we apply the standard chat template with \texttt{add\_generation\_prompt=True} and extract the hidden state vector $\mathbf{h}^{(l)}_{\text{TBG}} \in \mathbb{R}^{d}$ (where $d = 3072$) at each layer $l \in \{0, \ldots, 27\}$. This position captures the model's internal representation immediately prior to autoregressive decoding and serves as the sole input to our probes.
+
+\textbf{Response Sampling for Supervision.}
+To construct supervision signals, we generate $N = 10$ responses per prompt using temperature-scaled + nucleus sampling. ($T{=}1.0$, top-$p{=}0.9$, top-$k{=}50$), capturing stochastic variation in model behavior. This sampling configuration balances diversity with coherence, ensuring that the model's behavioral uncertainty under adversarial prompts is adequately represented.
+
+\textbf{Intent-Based Response Classification.}
+Generated responses are categorized using Gemini~2.5~Flash into safety intent classes (Harmful Compliance, Disguised Harmful, Appropriate Refusal). The classifier receives the original prompt and all sampled responses in a single request, producing a structured JSON mapping from responses to intent labels. These labels are used to compute empirical intent probabilities $p_i(x)$, which in turn yield the safety-weighted entropy (Eq.~\ref{eq:swse}) and joint risk targets (Eq.~\ref{eq:joint_risk}) used as probe supervision.
+
+\textbf{Probe Training Details.}
+Our four-layer MLP probe architecture consists of: input layer ($d_{\text{input}} \rightarrow 512$), two hidden layers ($512 \rightarrow 256 \rightarrow 128$), and output layer ($128 \rightarrow 1$) with sigmoid activation. We use ReLU activations and batch normalization between hidden layers, dropout of 0.2, and train with Adam optimizer (learning rate $1 \times 10^{-3}$) for 100 epochs with early stopping on validation MSE (patience 10). For concatenated probes, $d_{\text{input}} = k \times 3072$ where $k$ is the number of selected layers.
+
+\subsection{Online Detection Stage}
+
+At inference time, a single forward pass through the target model extracts TBG hidden states without generating any tokens. The trained MLP probe maps these hidden states to a predicted risk score $\hat{T}(x) \in [0,1]$. If $\hat{T}(x)$ exceeds a deployment-specific threshold, generation is halted before the first token is produced. The entire detection pipeline---forward pass plus probe inference---adds negligible latency ($<$5ms for the probe component) compared to multi-sampling defenses that require $N$ full generation passes.
+
+\subsection{Dataset Composition}
+
+Table~\ref{tab:dataset_app} provides the detailed breakdown of our dataset by source.
+
+\begin{table}[ht]
+\centering
+\caption{Dataset composition by source.}
+\label{tab:dataset_app}
+\begin{tabular}{@{}lc@{}}
+\toprule
+\textbf{Source} & \textbf{Count} \\
+\midrule
+\multicolumn{2}{@{}l@{}}{\textit{Harmful Prompts}} \\
+\quad JailBreakV-28K & 5,000 \\
+\quad xTRam1/safe-guard-prompt-injection & 3,000 \\
+\quad In-The-Wild-Jailbreak & 651 \\
+\quad AdvBench & 509 \\
+\quad HarmBench & 382 \\
+\quad JailbreakBench & 100 \\
+\quad TDC23-RedTeaming & 55 \\
+\midrule
+\textbf{Total Harmful} & \textbf{9,697} \\
+\midrule
+\multicolumn{2}{@{}l@{}}{\textit{Benign Prompts}} \\
+\quad xTRam1/safe-guard-prompt-injection & 7,000 \\
+\midrule
+\textbf{Total Benign} & \textbf{7,000} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Data preprocessing includes: (i)~removal of duplicates via case-insensitive exact matching, (ii)~exclusion of trivially short strings ($<$10 characters), and (iii)~exclusion of entries requiring non-textual modalities. We preserve available metadata (functional/semantic category, target, source, and temporal or platform tags) and standardize identifiers across sources. The held-out test set (650 harmful, 1,410 benign) is drawn exclusively from the xTRam1 dataset to ensure no source overlap between training and evaluation splits.
+
+\end{document}
